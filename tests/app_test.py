@@ -15,6 +15,7 @@ table = CategoryTable([
     ItemMapping(name='이케아코리아', spend_type='주거', display_name='이케아'),
     ItemMapping(name='신한카드', spend_type='신한카드', display_name='카드대금(신한)'),
     ItemMapping(name='네이버페이충전', spend_type='네이버페이', display_name='네이버페이 충전'),
+    ItemMapping(name='KB카드출금', spend_type='국민카드', display_name='카드대금(국민)'),
 ])
 
 
@@ -80,5 +81,31 @@ def test_spend_shbank():
         left='네이버페이',
         right='신한은행',
         money=100000,
+        memo='')
+    app.client.spend.assert_called_once_with(expected)
+
+
+def test_spend_kbbank():
+    app = whooing_api.api.app
+    app.category_table = table
+
+    client = TestClient(app)
+
+    app.client.spend = AsyncMock(return_value='done')
+    msg = '''[Web발신]
+[KB]12/19 09:45
+112233**455
+KB카드출금
+카드출금(
+123,400
+잔액10,000,000'''
+    res = client.post('/whooing/kbbank/', json={'message': msg})
+
+    expected = whooing_api.whooing.WhooingEntry(
+        entry_date='20241219',
+        item='카드대금(국민)',
+        left='국민카드',
+        right='국민은행',
+        money=123400,
         memo='')
     app.client.spend.assert_called_once_with(expected)

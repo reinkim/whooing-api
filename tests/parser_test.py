@@ -34,7 +34,7 @@ def test_shbank():
 
 # 신한카드
 def test_shcard_krw():
-    parser = whooing_api.ShcardParser()
+    parser = whooing_api.parser.ShcardParser()
 
     # 본인 카드
     krwExample0 = '''[Web발신]
@@ -63,7 +63,7 @@ def test_shcard_krw():
     assert expected == v
 
 def test_shcard_usd():
-    parser = whooing_api.ShcardParser()
+    parser = whooing_api.parser.ShcardParser()
 
     # USD, NL
     usdExample0 = '''[Web발신]
@@ -105,3 +105,23 @@ def test_nearest_date():
 
 # TODO: 취소, 해외승인?, 체크카드, 아파트 관리비 승인
 
+
+def test_kbbank():
+    parser = whooing_api.parser.KbbankParser()
+
+    example0 = '''[Web발신]
+[KB]12/19 09:45
+112233**455
+KB카드출금
+카드출금(
+123,400
+잔액10,000,000'''
+    v = parser.parse(example0)
+    assert v == {
+        'date': datetime.date(2024, 12, 19),
+        'amount': 123400,
+        'left': '기타',
+        'right': '국민은행',
+        'item': 'KB카드출금',
+        'memo': '',
+    }
