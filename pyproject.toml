@@ -1,0 +1,58 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "whooing_api"
+dynamic = ["version"]
+description = "Whooing API"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [
+    { name = "Jinuk Kim", email = "jinuk.kim@prgmr.dev" },
+]
+dependencies = [
+    "fastapi",
+    "pydantic",
+    "pydantic-settings",
+    "aiohttp",
+    "sentry-sdk[fastapi]",
+    'pygtrie',
+]
+
+
+[project.optional-dependencies]
+all = [
+    "fastapi[standard]",
+    "aiohttp",
+    "uvicorn[standard]",
+    "sentry-sdk[fastapi]",
+    'pygtrie',
+    "pydantic-settings",
+]
+
+[tool.pdm]
+fallback_version = '0.0.1'
+distribution = true
+
+[tool.pdm.version]
+# NOTE(jinuk): run `PDM_BUILD_SCM_VERSION=0.0.1 pdm build`.
+source = 'scm'
+
+[tool.pdm.build]
+source-includes = [
+    "tests/",
+    "etc/",
+]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--ignore=docs_src",
+]
+xfail_strict = true
+junit_family = "xunit2"
+filterwarnings = [
+    "error",
+]
