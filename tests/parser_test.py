@@ -5,10 +5,11 @@ import datetime
 from zoneinfo import ZoneInfo
 
 import whooing_api
+import whooing_api.parser
 
 
 def test_shcard_krw():
-    parser = whooing_api.Parser()
+    parser = whooing_api.ShcardParser()
 
     # 본인 카드
     krwExample0 = '''[Web발신]
@@ -37,7 +38,7 @@ def test_shcard_krw():
     assert expected == v
 
 def test_shcard_usd():
-    parser = whooing_api.Parser()
+    parser = whooing_api.ShcardParser()
 
     # USD, NL
     usdExample0 = '''[Web발신]

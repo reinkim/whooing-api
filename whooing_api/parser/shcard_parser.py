@@ -22,7 +22,7 @@ rateUSD2KRW = 1400
 tzSeoul = ZoneInfo('Asia/Seoul')
 
 
-class Parser:
+class ShcardParser:
     def __init__(self):
         pass
 

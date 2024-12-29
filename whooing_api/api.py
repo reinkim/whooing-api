@@ -6,7 +6,7 @@ import aiohttp
 from pydantic import BaseModel
 from fastapi import FastAPI
 
-from .parser import Parser
+from .parser import ShcardParser
 from .category_table import CategoryTable
 from .utils import init_sentry, get_settings, get_rules, get_webhook_url
 
@@ -50,7 +50,7 @@ async def index():
 
 @app.post('/whooing/{method}/')
 async def payment(method: str, msg: SMSMessage):
-    parser = Parser()
+    parser = ShcardParser()
     parsed = parser.parse(msg.message)
 
     if not parsed:
