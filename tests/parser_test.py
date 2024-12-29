@@ -6,8 +6,34 @@ from zoneinfo import ZoneInfo
 
 import whooing_api
 import whooing_api.parser
+from whooing_api.parser.utils import nearest_date
 
 
+# 신한은행
+def test_shbank():
+    parser = whooing_api.parser.ShbankParser()
+
+    # 카드대금
+    example0 = '''[Web발신]
+신한12/26 18:52
+123-456-789012
+출금     650,000
+잔액 12,345,678
+ 현대카드(주)'''
+
+    v = parser.parse(example0)
+    expected = {
+        'date': datetime.date(2024, 12, 26),
+        'amount': 650000,
+        'left': '기타',
+        'right': '신한은행',
+        'item': '현대카드(주)',
+        'memo': '',
+    }
+    assert expected == v
+
+
+# 신한카드
 def test_shcard_krw():
     parser = whooing_api.ShcardParser()
 
@@ -68,16 +94,15 @@ def test_shcard_usd():
 
 def test_nearest_date():
     today = datetime.date(2024, 1, 2)
-    d = datetime.date(2024, 12, 29)
-    d2 = datetime.date(2023, 12, 29)
 
-    assert d2 == whooing_api.parser.nearest_date(d, today)
-
-    d = datetime.date(2024, 1, 1)
-    assert d == whooing_api.parser.nearest_date(d, today)
+    assert nearest_date(12, 29, today) == datetime.date(2023, 12, 29)
+    assert nearest_date(1, 2, today) == datetime.date(2024, 1, 2)
 
     # 2024-02-29 is valid, but 2023-02-29 is not.
-    d = datetime.date(2024, 2, 29)
-    assert d == whooing_api.parser.nearest_date(d, today)
+    assert nearest_date(2, 29, today) == datetime.date(2024, 2, 29)
+
+    today = datetime.date(2025, 3, 1)
+    assert nearest_date(2, 29, today) == datetime.date(2024, 2, 29)
 
 # TODO: 취소, 해외승인?, 체크카드, 아파트 관리비 승인
+

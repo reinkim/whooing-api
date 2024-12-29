@@ -1,10 +1,12 @@
-#!/usr/bin/env python3
 # vim: fileencoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4
 
 import datetime
 import decimal
 import re
 from zoneinfo import ZoneInfo
+
+from .utils import nearest_date, today_kr
+
 
 fromWeb = '[Web발신]'
 
@@ -17,9 +19,6 @@ patternItem = re.compile(r'(.*?)(\s누적[0-9,]+원)?$')
 
 # default currency exchange rates
 rateUSD2KRW = 1400
-
-# default timezone
-tzSeoul = ZoneInfo('Asia/Seoul')
 
 
 class ShcardParser:
@@ -64,9 +63,10 @@ class ShcardParser:
         # NOTE(jinuk): it's error prone to use the snippet, but we don't have a
         # precise method to get a year, as it's not available from received
         # messages.
-        today = datetime.datetime.now(tz=tzSeoul).date()
-        d = datetime.date(year=today.year, month=int(m.group(1)), day=int(m.group(2)))
-        d = nearest_date(d, today)
+        today = today_kr()
+        month = int(m.group(1))
+        day = int(m.group(2))
+        d = nearest_date(month, day, today)
 
         msg = msg[len(m.group(0)):].strip()
         m = patternItem.match(msg)
@@ -82,14 +82,3 @@ class ShcardParser:
             'memo': memo,
         }
         return rv
-
-# choose nearest datetime from [(prev year, month, day), (this year, ...)]
-def nearest_date(d: datetime.date, today: datetime.date) -> datetime.date:
-    try:
-        prev = d.replace(year=d.year-1)
-    except ValueError: # leap year
-        return d
-
-    distPrev= abs((prev - today).days)
-    distCurr = abs((today - d).days)
-    return prev if distPrev < distCurr else d
