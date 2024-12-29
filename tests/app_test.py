@@ -21,7 +21,7 @@ table = CategoryTable([
 
 def test_spend_shcard():
     app = whooing_api.api.app
-    app.category_table = table
+    app.lookup_table = table
     app.client.spend = AsyncMock(return_value='done')
 
     client = TestClient(app)
@@ -42,7 +42,7 @@ def test_spend_shcard():
 
 def test_spend_shbank():
     app = whooing_api.api.app
-    app.category_table = table
+    app.lookup_table = table
 
     client = TestClient(app)
 
@@ -87,7 +87,7 @@ def test_spend_shbank():
 
 def test_spend_kbbank():
     app = whooing_api.api.app
-    app.category_table = table
+    app.lookup_table = table
 
     client = TestClient(app)
 

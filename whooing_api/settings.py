@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     ## Whooing webhook token. For example, '1234-1234-1234-1234-1234'
     ## https://whooing.com/#main/setting 하단에서 확인 가능
-    whooing_token: Secret[str]
+    whooing_token: Secret[str] = Field(default='1234-1234-1234-1234-1234')
 
     # Sentry DSN (optional)
     ## For example, https://abcdef123456.ingest.us.sentry.io/1234567890
