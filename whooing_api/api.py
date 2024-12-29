@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 from fastapi import FastAPI
 
-from .parser import ShcardParser
+from .parser import new_parser
 from .category_table import CategoryTable
 from .whooing import Client, WhooingEntry
 from .utils import init_sentry, get_settings, get_rules, get_webhook_url
@@ -40,9 +40,11 @@ async def index():
 
 @app.post('/whooing/{method}/')
 async def payment(method: str, msg: SMSMessage):
-    parser = ShcardParser()
-    parsed = parser.parse(msg.message)
+    parser = new_parser(method)
+    if not parser:
+        return {'status': 'invalid method'}
 
+    parsed = parser.parse(msg.message)
     if not parsed:
         # NOTE: fallback to send a message to the webhook on whooing.
         resp = await app.client.whooing_fallback(msg.message)

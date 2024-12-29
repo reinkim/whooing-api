@@ -13,6 +13,8 @@ from whooing_api.category_table import CategoryTable, ItemMapping
 
 table = CategoryTable([
     ItemMapping(name='이케아코리아', spend_type='주거', display_name='이케아'),
+    ItemMapping(name='신한카드', spend_type='신한카드', display_name='카드대금(신한)'),
+    ItemMapping(name='네이버페이충전', spend_type='네이버페이', display_name='네이버페이 충전'),
 ])
 
 
@@ -25,7 +27,6 @@ def test_spend_shcard():
 
     msg = '[Web발신]신한(1234)승인 최*희 40,000원(일시불)12/25 12:34 이케아코리아'
     res = client.post('/whooing/shcard/', json={'message': msg})
-
     assert res.json() == {'status': 'done'}
 
     expected = whooing_api.whooing.WhooingEntry(
@@ -35,5 +36,49 @@ def test_spend_shcard():
         right='신한카드',
         money=40000,
         memo='')
+    app.client.spend.assert_called_once_with(expected)
 
+
+def test_spend_shbank():
+    app = whooing_api.api.app
+    app.category_table = table
+
+    client = TestClient(app)
+
+    app.client.spend = AsyncMock(return_value='done')
+    msg = '''[Web발신]
+신한12/26 18:01
+123-123-123456
+출금   100,000
+잔액 500
+ 신한카드'''
+    res = client.post('/whooing/shbank/', json={'message': msg})
+    assert res.json() == {'status': 'done'}
+
+    expected = whooing_api.whooing.WhooingEntry(
+        entry_date='20241226',
+        item='카드대금(신한)',
+        left='신한카드',
+        right='신한은행',
+        money=100000,
+        memo='')
+    app.client.spend.assert_called_once_with(expected)
+
+    app.client.spend = AsyncMock(return_value='done')
+    msg = '''[Web발신]
+신한12/26 18:01
+123-123-123456
+출금   100,000
+잔액 500
+ 네이버페이충전'''
+    res = client.post('/whooing/shbank/', json={'message': msg})
+    assert res.json() == {'status': 'done'}
+
+    expected = whooing_api.whooing.WhooingEntry(
+        entry_date='20241226',
+        item='네이버페이 충전',
+        left='네이버페이',
+        right='신한은행',
+        money=100000,
+        memo='')
     app.client.spend.assert_called_once_with(expected)
