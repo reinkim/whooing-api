@@ -3,7 +3,7 @@
 from typing import Optional
 
 import aiohttp
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class WhooingEntry(BaseModel):
@@ -14,7 +14,7 @@ class WhooingEntry(BaseModel):
     left: str
     right: str
     money: int
-    memo: Optional[str] = ''
+    memo: Optional[str] = Field(default='')
 
 
 class Client:
