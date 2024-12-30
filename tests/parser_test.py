@@ -128,9 +128,9 @@ KB카드출금
 
 
 def test_naverpay():
+    # 네이버페이 일반결제
     parser = whooing_api.parser.NaverpayParser()
 
-    # 네이버페이 일반결제
     with open('tests/fixtures/naverpay.html', 'r') as f:
         msg = f.read()
     v = parser.parse(msg)
@@ -144,7 +144,39 @@ def test_naverpay():
         'memo': '괴도 세인트 테일 : 천사소녀 네티 1~4 애장판 박스 세트 - 전4권 외 1건',
     }
 
+    # 네이버페이 일반결제 (카드)
+    with open('tests/fixtures/naverpay-card.html', 'r') as f:
+        msg = f.read()
+    v = parser.parse(msg)
+
+    assert v == {
+        'date': datetime.date(2024, 11, 24),
+        'amount': 11900,
+        'left': '기타',
+        'right': '네이버페이',
+        'item': '버스타고',
+        'memo': '[11/24(일), 시외우등] 인천공항T2(12:34) - 서현역',
+    }
+
+    # 네이버페이 일반결제 (지방세, 카드)
+    with open('tests/fixtures/naverpay-tax.html', 'r') as f:
+        msg = f.read()
+    v = parser.parse(msg)
+
+    assert v == {
+        'date': datetime.date(2024, 9, 15),
+        'amount': 200000,
+        'left': '기타',
+        'right': '네이버페이',
+        'item': '금융결제원 인터넷지로',
+        'memo': '위택스',
+    }
+
+
+def test_naverpay_shopping():
     # 네이버쇼핑
+    parser = whooing_api.parser.NaverpayParser()
+
     with open('tests/fixtures/navershopping.html', 'r') as f:
         msg = f.read()
     v = parser.parse(msg)
@@ -155,5 +187,22 @@ def test_naverpay():
         'left': '기타',
         'right': '네이버페이',
         'item': 'Foo Bar',
+        'memo': '',
+    }
+
+
+def test_naverpay_offline():
+    # 오프라인 결제
+    parser = whooing_api.parser.NaverpayParser()
+    with open('tests/fixtures/naverpay-offline.html', 'r') as f:
+        msg = f.read()
+    v = parser.parse(msg)
+
+    assert v == {
+        'date': datetime.date(2024, 12, 18),
+        'amount': 1400,
+        'left': '기타',
+        'right': '네이버페이',
+        'item': 'GS25 대통령실점',
         'memo': '',
     }

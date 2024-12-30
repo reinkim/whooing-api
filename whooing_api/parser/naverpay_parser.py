@@ -1,12 +1,14 @@
 # vim: fileencoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4
 
 import datetime
+import itertools
 import re
 
 from bs4 import BeautifulSoup
 
 
 subTablePattern = re.compile(r'\s*주문상품\s*')
+amountPattern = re.compile(r'\s*최종결제금액\s*')
 
 
 class NaverpayParser:
@@ -17,12 +19,12 @@ class NaverpayParser:
         soup = BeautifulSoup(msg, 'html.parser')
         try:
             return self._parse_naver_pay(soup)
-        except ValueError:
+        except:
             pass
 
         try:
             return self._parse_naver_shopping(soup)
-        except ValueError:
+        except:
             pass
 
         return ValueError('invalid message format for 네이버페이')
@@ -37,18 +39,19 @@ class NaverpayParser:
         item = ''
         memo = ''
 
-        # `td` elements with width=70 have most of the information.
-        for td in soup.find_all('td', width='70'):
+        # `td` elements with width=70 or width=50% have most of the information.
+        for td in itertools.chain(soup.find_all('td', width='70'),
+                                  soup.find_all('td', width='50%')):
             field = td.text.strip()
 
             match field:
                 case '결제일자':
                     try:
-                        dstr = readNextTd(td)
+                        dstr = readNextTd(td).split(' ')[0]
                         d = datetime.datetime.strptime(dstr, '%Y.%m.%d').date()
                     except:
                         raise ValueError('invalid date format for 네이버페이')
-                case '결제처':
+                case '결제처' | '가맹점명':
                     item = readNextTd(td)
                 case '상품정보':
                     memo = readNextTd(td)
@@ -57,15 +60,10 @@ class NaverpayParser:
             raise ValueError('invalid item format for 네이버페이')
 
         amount = 0
-        for p in soup.find_all('strong'):
-            if p.text.strip() != '주문금액':
-                continue
-
-            td = p.parent
-            tr = td.parent
-            v = tr.find_all('td')[1].span.text.strip().replace(',', '')
-            amount = int(v)
-            break
+        td = soup.find(string=amountPattern).parent
+        if td:
+            p = td.parent.find_all('td')[1].find('span')
+            amount = int(p.text.strip().replace(',', ''))
 
         if amount == 0:
             raise ValueError('invalid amount for 네이버페이')
@@ -116,7 +114,6 @@ class NaverpayParser:
                 except:
                     raise ValueError('invalid date format for 네이버페이')
                 break
-
 
         return {
             'date': d,
