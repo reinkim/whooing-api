@@ -1,5 +1,4 @@
 # vim: fileencoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4
-import datetime
 import re
 
 from .utils import nearest_date, today_kr

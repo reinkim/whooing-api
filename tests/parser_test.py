@@ -8,6 +8,19 @@ import whooing_api.parser
 from whooing_api.parser.utils import nearest_date
 
 
+def test_nearest_date():
+    today = datetime.date(2024, 1, 2)
+
+    assert nearest_date(12, 29, today) == datetime.date(2023, 12, 29)
+    assert nearest_date(1, 2, today) == datetime.date(2024, 1, 2)
+
+    # 2024-02-29 is valid, but 2023-02-29 is not.
+    assert nearest_date(2, 29, today) == datetime.date(2024, 2, 29)
+
+    today = datetime.date(2025, 3, 1)
+    assert nearest_date(2, 29, today) == datetime.date(2024, 2, 29)
+
+
 # 신한은행
 def test_shbank():
     parser = whooing_api.parser.ShbankParser()
@@ -90,19 +103,6 @@ def test_shcard_usd():
         'memo': 'TBD, USD 70.64',
     }
     assert expected == v
-
-def test_nearest_date():
-    today = datetime.date(2024, 1, 2)
-
-    assert nearest_date(12, 29, today) == datetime.date(2023, 12, 29)
-    assert nearest_date(1, 2, today) == datetime.date(2024, 1, 2)
-
-    # 2024-02-29 is valid, but 2023-02-29 is not.
-    assert nearest_date(2, 29, today) == datetime.date(2024, 2, 29)
-
-    today = datetime.date(2025, 3, 1)
-    assert nearest_date(2, 29, today) == datetime.date(2024, 2, 29)
-
 # TODO: 취소, 해외승인?, 체크카드, 아파트 관리비 승인
 
 
@@ -123,5 +123,37 @@ KB카드출금
         'left': '기타',
         'right': '국민은행',
         'item': 'KB카드출금',
+        'memo': '',
+    }
+
+
+def test_naverpay():
+    parser = whooing_api.parser.NaverpayParser()
+
+    # 네이버페이 일반결제
+    with open('tests/fixtures/naverpay.html', 'r') as f:
+        msg = f.read()
+    v = parser.parse(msg)
+
+    assert v == {
+        'date': datetime.date(2024, 12, 27),
+        'amount': 55030,
+        'left': '기타',
+        'right': '네이버페이',
+        'item': '알라딘커뮤니케이션',
+        'memo': '괴도 세인트 테일 : 천사소녀 네티 1~4 애장판 박스 세트 - 전4권 외 1건',
+    }
+
+    # 네이버쇼핑
+    with open('tests/fixtures/navershopping.html', 'r') as f:
+        msg = f.read()
+    v = parser.parse(msg)
+
+    assert v == {
+        'date': datetime.date(2024, 12, 20),
+        'amount': 13400,
+        'left': '기타',
+        'right': '네이버페이',
+        'item': 'Foo Bar',
         'memo': '',
     }
