@@ -21,5 +21,4 @@ def new_parser(method: str):
             return shcard_parser
         case "shbank":
             return shbank_parser
-        case _:
-            return None
+    return None

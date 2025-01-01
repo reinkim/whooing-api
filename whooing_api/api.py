@@ -23,7 +23,7 @@ class SMSMessage(BaseModel):
 
 
 def to_whooing_entry(parsed):
-    dt = parsed['date'].strftime('%Y%m%d')
+    dt = parsed['date'].strftime('%Y%m%d') if parsed['date'] else ''
 
     return WhooingEntry(entry_date=dt,
                         item=parsed['item'],

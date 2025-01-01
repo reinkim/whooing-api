@@ -129,7 +129,7 @@ KB카드출금
 
 def read_utf16_file(filepath):
     with open(filepath, 'rb') as f:
-        return f.read().decode('utf-16le')
+        return f.read().decode('utf-16le').replace('\n', ' ')
 
 
 def test_naverpay():
@@ -144,7 +144,7 @@ def test_naverpay():
         'amount': 55030,
         'left': '기타',
         'right': '네이버페이',
-        'item': '알라딘커뮤니케이션',
+        'item': '알라딘 커뮤니케이션',
         'memo': '괴도 세인트 테일 : 천사소녀 네티 1~4 애장판 박스 세트 - 전4권 외 1건',
     }
 
