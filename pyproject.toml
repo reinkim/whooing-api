@@ -29,7 +29,6 @@ all = [
     "sentry-sdk[fastapi]",
     'pygtrie',
     "pydantic-settings",
-    "beautifulsoup4",
 ]
 
 [tool.pdm]

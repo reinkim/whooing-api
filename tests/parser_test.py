@@ -127,12 +127,16 @@ KB카드출금
     }
 
 
+def read_utf16_file(filepath):
+    with open(filepath, 'rb') as f:
+        return f.read().decode('utf-16le')
+
+
 def test_naverpay():
     # 네이버페이 일반결제
     parser = whooing_api.parser.NaverpayParser()
 
-    with open('tests/fixtures/naverpay.html', 'r') as f:
-        msg = f.read()
+    msg = read_utf16_file('tests/fixtures/naverpay-aladin.txt')
     v = parser.parse(msg)
 
     assert v == {
@@ -145,8 +149,7 @@ def test_naverpay():
     }
 
     # 네이버페이 일반결제 (카드)
-    with open('tests/fixtures/naverpay-card.html', 'r') as f:
-        msg = f.read()
+    msg = read_utf16_file('tests/fixtures/naverpay-bus.txt')
     v = parser.parse(msg)
 
     assert v == {
@@ -159,8 +162,7 @@ def test_naverpay():
     }
 
     # 네이버페이 일반결제 (지방세, 카드)
-    with open('tests/fixtures/naverpay-tax.html', 'r') as f:
-        msg = f.read()
+    msg = read_utf16_file('tests/fixtures/naverpay-wetax.txt')
     v = parser.parse(msg)
 
     assert v == {
@@ -177,8 +179,7 @@ def test_naverpay_shopping():
     # 네이버쇼핑
     parser = whooing_api.parser.NaverpayParser()
 
-    with open('tests/fixtures/navershopping.html', 'r') as f:
-        msg = f.read()
+    msg = read_utf16_file('tests/fixtures/naverpay-shopping.txt')
     v = parser.parse(msg)
 
     assert v == {
@@ -194,8 +195,8 @@ def test_naverpay_shopping():
 def test_naverpay_offline():
     # 오프라인 결제
     parser = whooing_api.parser.NaverpayParser()
-    with open('tests/fixtures/naverpay-offline.html', 'r') as f:
-        msg = f.read()
+
+    msg = read_utf16_file('tests/fixtures/naverpay-gs25.txt')
     v = parser.parse(msg)
 
     assert v == {

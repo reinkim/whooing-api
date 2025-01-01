@@ -1,125 +1,53 @@
 # vim: fileencoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4
 
 import datetime
-import itertools
-import re
-
-from bs4 import BeautifulSoup
 
 
-subTablePattern = re.compile(r'\s*주문상품\s*')
-amountPattern = re.compile(r'\s*최종결제금액\s*')
+dtFormat = '%Y.%m.%d'
 
+
+def _sanitize(s: str) -> str:
+    return s.replace('\uFFFC', '').strip()
 
 class NaverpayParser:
     def __init__(self):
         pass
 
     def parse(self, msg: str):
-        soup = BeautifulSoup(msg, 'html.parser')
-        try:
-            return self._parse_naver_pay(soup)
-        except:
-            pass
-
-        try:
-            return self._parse_naver_shopping(soup)
-        except:
-            pass
-
-        return ValueError('invalid message format for 네이버페이')
-
-    def _parse_naver_pay(self, soup: BeautifulSoup):
-        # read the text of the next `td` element.
-        def readNextTd(td):
-            parent = td.parent
-            nextTd = parent.find_all('td')[1]
-            return nextTd.text.strip()
+        rows = [_sanitize(l) for l in msg.split('\n')]
+        rows = [l for l in rows if l]
 
         item = ''
         memo = ''
+        d = None
+        amount = 0
+        i = 0
 
-        # `td` elements with width=70 or width=50% have most of the information.
-        for td in itertools.chain(soup.find_all('td', width='70'),
-                                  soup.find_all('td', width='50%')):
-            field = td.text.strip()
-
-            match field:
-                case '결제일자':
-                    try:
-                        dstr = readNextTd(td).split(' ')[0]
-                        d = datetime.datetime.strptime(dstr, '%Y.%m.%d').date()
-                    except:
-                        raise ValueError('invalid date format for 네이버페이')
-                case '결제처' | '가맹점명':
-                    item = readNextTd(td)
+        while i < len(rows) - 1:
+            match rows[i]:
+                case '결제처' | '가맹점명' | '주문상품':
+                    if not item:
+                        item = rows[i+1]
+                    i += 1
+                case '결제일자' | '주문일자':
+                    d = datetime.datetime.strptime(rows[i+1].split(' ')[0], dtFormat).date()
+                    i += 1
                 case '상품정보':
-                    memo = readNextTd(td)
-
-        if item == '':
-            raise ValueError('invalid item format for 네이버페이')
-
-        amount = 0
-        td = soup.find(string=amountPattern).parent
-        if td:
-            p = td.parent.find_all('td')[1].find('span')
-            amount = int(p.text.strip().replace(',', ''))
-
-        if amount == 0:
-            raise ValueError('invalid amount for 네이버페이')
+                    memo = rows[i+1]
+                    i += 1
+                case '최종결제금액' | '주문금액':
+                    amountStr = rows[i+1].replace(',', '')
+                    if amountStr.endswith('원'):
+                        amountStr = amountStr[:-1]
+                    amount = int(amountStr)
+                    i += 1
+            i += 1
 
         return {
             'date': d,
+            'amount': amount,
             'left': '기타',
             'right': '네이버페이',
             'item': item,
-            'amount': amount,
-            'memo': memo,
-        }
-
-    def _parse_naver_shopping(self, soup: BeautifulSoup):
-        # read the text of the next `td` element.
-        def readNextTd(td):
-            parent = td.parent
-            nextTd = parent.find_all('td')[1]
-            return nextTd.text.strip()
-
-        memo = ''
-
-        amount = 0
-        p = soup.find('td', {'width': '45%'})
-        amountStr = readNextTd(p)
-        if amountStr.endswith('원'):
-            amountStr = amountStr[:-1]
-        amount = int(amountStr.replace(',', ''))
-        if amount == 0:
-            raise ValueError('invalid amount for 네이버페이')
-
-        # item name
-        item = ''
-        p = soup.find_all(string=subTablePattern)[-1]
-        subTbl = p.parent.parent.parent.find('table')
-        try:
-            item = subTbl.find('table').find('tr').find('td').text.strip()
-        except:
-            item = ''
-        if item == '':
-            raise ValueError('invalid item format for 네이버페이')
-
-        for td in soup.find_all('td', width='70'):
-            if td.text.strip() == '주문일자':
-                try:
-                    dstr = readNextTd(td)
-                    d = datetime.datetime.strptime(dstr, '%Y.%m.%d').date()
-                except:
-                    raise ValueError('invalid date format for 네이버페이')
-                break
-
-        return {
-            'date': d,
-            'left': '기타',
-            'right': '네이버페이',
-            'item': item,
-            'amount': amount,
             'memo': memo,
         }
