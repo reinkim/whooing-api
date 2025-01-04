@@ -103,6 +103,21 @@ def test_shcard_usd():
         'memo': 'TBD, USD 70.64',
     }
     assert expected == v
+
+    # USD, NL (2025)
+    usdExample2 = '''[Web발신]
+신한해외승인 김철수(1111) 01/01 18:05
+9.66 달러 (NL)DIGITALOCEAN.COM'''
+    v = parser.parse(usdExample2)
+    expected = {
+        'date': datetime.date(2025, 1, 1),
+        'amount': int(1400 * 9.66),
+        'right': '신한카드',
+        'item': 'DIGITALOCEAN.COM',
+        'memo': 'TBD, USD 9.66',
+    }
+    assert expected == v
+
 # TODO: 취소, 해외승인?, 체크카드, 아파트 관리비 승인
 
 
