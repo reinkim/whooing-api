@@ -18,6 +18,7 @@ dependencies = [
     "aiohttp",
     "sentry-sdk[fastapi]",
     'pygtrie',
+    "requests>=2.32.3",
 ]
 
 

@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import Optional
 
 from pydantic import Field, FilePath, HttpUrl, Secret
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -9,7 +9,7 @@ class Settings(BaseSettings):
 
     # Whooing
     ## 미리 지정한 규칙이 들어있는 tsv 파일 경로
-    rules: Optional[FilePath] = Field(default=None)
+    rules: Optional[FilePath] | Optional[HttpUrl] = Field(default=None)
 
     ## Whooing webhook token. For example, '1234-1234-1234-1234-1234'
     ## https://whooing.com/#main/setting 하단에서 확인 가능
