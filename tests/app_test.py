@@ -1,4 +1,5 @@
 # vim: fileencoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4
+"""app_test tests against FastAPI app that wraps whooing API."""
 
 from unittest.mock import AsyncMock
 
