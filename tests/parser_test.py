@@ -136,7 +136,7 @@ def test_shcard_usd():
     }
     assert expected == v
 
-# 처리 안할 단어 목록
+# TODO: 처리 안할 단어 목록
 # [신한카드] 해외결제 유의사항 안내
 # [신한카드]해외원화결제시 추가수수료가 부과되므로 현지통화 거래가 유리합니다.
 # [신한카드] 원화결제차단 서비스신청
@@ -173,6 +173,24 @@ def test_shcard_apt():
     }
     assert expected == v
 
+
+# 체크카드
+def test_shdebit():
+    parser = whooing_api.parser.ShdebitParser()
+
+    example0 = '''[Web발신]
+[신한체크승인] 홍길*(1231) 10/20 00:23 28,600원 카카오T일반택  잔액12,345,678원'''
+
+    v = parser.parse(example0)
+
+    expected = {
+        'date': datetime.date(2024, 10, 20),
+        'amount': 28600,
+        'right': '신한체크',
+        'item': '카카오T일반택',
+        'memo': '',
+    }
+    assert expected == v
 
 
 def test_kbbank():

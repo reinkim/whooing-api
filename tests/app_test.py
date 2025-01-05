@@ -17,6 +17,7 @@ table = CategoryTable([
     ItemMapping(name='신한카드', spend_type='신한카드', display_name='카드대금(신한)'),
     ItemMapping(name='네이버페이충전', spend_type='네이버페이', display_name='네이버페이 충전'),
     ItemMapping(name='KB카드출금', spend_type='국민카드', display_name='카드대금(국민)'),
+    ItemMapping(name='카카오T일반택시', spend_type='교통비', display_name='택시'),
 ])
 
 
@@ -127,5 +128,25 @@ KB카드출금
         left='국민카드',
         right='국민은행',
         money=123400,
+        memo='')
+    app.client.spend.assert_called_once_with(expected)
+
+def test_spend_shdebit():
+    app = whooing_api.api.app
+    app.lookup_table = table
+
+    client = TestClient(app)
+
+    app.client.spend = AsyncMock(return_value='done')
+    msg = '''[Web발신][신한체크승인] 홍길*(1231) 10/20 00:23 28,600원 카카오T일반택  잔액12,345,678원'''
+    res = client.post('/whooing/shdebit/', json={'message': msg})
+    assert res.json() == {'status': 'done'}
+
+    expected = whooing_api.whooing.WhooingEntry(
+        entry_date='20241020',
+        item='택시',
+        left='교통비',
+        right='신한체크',
+        money=28600,
         memo='')
     app.client.spend.assert_called_once_with(expected)

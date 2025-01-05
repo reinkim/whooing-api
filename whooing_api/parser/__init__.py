@@ -4,6 +4,7 @@ from .kbbank_parser import KbbankParser
 from .naverpay_parser import NaverpayParser
 from .shcard_parser import ShcardParser
 from .shbank_parser import ShbankParser
+from .shdebit_parser import ShdebitParser
 
 
 _parsers= {
@@ -11,6 +12,7 @@ _parsers= {
     "naverpay": NaverpayParser(),
     "shcard": ShcardParser(),
     "shbank": ShbankParser(),
+    "shdebit": ShdebitParser(),
 }
 
 
