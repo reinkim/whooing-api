@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import whooing_api
 import whooing_api.parser
-from whooing_api.parser.utils import nearest_date
+from whooing_api.parser.utils import nearest_date, today_kr
 
 
 def test_nearest_date():
@@ -136,7 +136,43 @@ def test_shcard_usd():
     }
     assert expected == v
 
-# TODO: 취소, 해외승인?, 체크카드, 아파트 관리비 승인
+# 처리 안할 단어 목록
+# [신한카드] 해외결제 유의사항 안내
+# [신한카드]해외원화결제시 추가수수료가 부과되므로 현지통화 거래가 유리합니다.
+# [신한카드] 원화결제차단 서비스신청
+def test_shcard_cancel():
+    parser = whooing_api.parser.ShcardParser()
+
+    example0 = '''[Web발신]
+신한카드(1224)취소 김*수 39,860원(일시불)01/02 18:15 이마트'''
+    v = parser.parse(example0)
+
+    expected = {
+        'date': datetime.date(2025, 1, 2),
+        'amount': -39860,
+        'right': '신한카드',
+        'item': '이마트',
+        'memo': '취소',
+    }
+    assert expected == v
+
+
+def test_shcard_apt():
+    parser = whooing_api.parser.ShcardParser()
+
+    example = '''[Web발신]
+신한카드(3333)승인 김*수님 아파트 관리비  400,000원 정상승인 되었습니다.'''
+    v = parser.parse(example)
+
+    expected = {
+        'date': today_kr(),
+        'amount': 400000,
+        'right': '신한카드',
+        'item': '아파트 관리비',
+        'memo': '',
+    }
+    assert expected == v
+
 
 
 def test_kbbank():

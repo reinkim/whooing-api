@@ -11,7 +11,7 @@ from .utils import nearest_date, today_kr
 fromWeb = '[Web발신]'
 
 # for Shinhan Card
-patternShcard = re.compile(r'신한(카드)?\([0-9]{4}\)(해외)?승인 \S+')
+patternShcard = re.compile(r'신한(카드)?\([0-9]{4}\)(해외)?(승인|취소) \S+')
 patternAmountKRW = re.compile(r'([1-9][0-9,]*)원\(일시불\)')
 patternAmountUSD = re.compile(r'([1-9][0-9,]*\.[0-9]{1,2}) 달러\s+\([A-Z]{2}\)')
 patternDate = re.compile(r'([0-9]{2})/([0-9]{2}) ([0-9]{2}):([0-9]{2})')
@@ -21,6 +21,9 @@ patternItem = re.compile(r'(.*?)(\s누적[0-9,]+원)?$')
 patternShcardAlt = re.compile(r'신한해외승인 \w+\([0-9]{4}\)')
 patternDateAlt = re.compile(r'([0-9]{2})/([0-9]{2}) ([0-9]{2}):([0-9]{2})')
 patternAmountUSDAlt = re.compile(r'\S+ ([1-9][0-9,]*\.[0-9]{1,2}) 달러\s+\([A-Z]{2}\)')
+
+# 아파트 관리비
+patternApt = re.compile(r'신한카드\([0-9]{4}\)승인 \S+ 아파트 관리비\s*([1-9][0-9,]*)원 정상승인')
 
 # default currency exchange rates
 rateUSD2KRW = 1400
@@ -33,13 +36,29 @@ class ShcardParser:
     def parse(self, msg: str):
         # remove a `[Web발신]` prefix, if exists.
         if msg.startswith(fromWeb):
-            msg = msg[len(fromWeb):]
+            msg = msg[len(fromWeb):].strip()
+
+        m = patternApt.match(msg)
+        if m:
+            amount = int(m.group(1).replace(',', ''))
+            d = today_kr()
+            return {
+                'right': '신한카드',
+                'amount': amount,
+                'date': d,
+                'item': '아파트 관리비',
+                'memo': '',
+            }
 
         memo = ''
         msg = msg.strip()
         m = patternShcard.match(msg)
+        isCancel = False
         if m:
             currencyHint = m.group(2)
+            isCancel = m.group(3) == '취소'
+            if isCancel:
+                memo = '취소'
         else:
             m = patternShcardAlt.match(msg)
             if not m:
@@ -77,7 +96,7 @@ class ShcardParser:
 
         rv = {
             'right': '신한카드',
-            'amount': amount,
+            'amount': amount if not isCancel else -amount,
             'date': d,
             'item': item,
             'memo': memo,
