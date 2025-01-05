@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from .parser import new_parser
 from .category_table import CategoryTable
 from .whooing import Client, WhooingEntry
-from .utils import init_sentry, get_settings, get_rules, get_webhook_url
+from .utils import init_sentry, get_settings, get_rules
 
 
 init_sentry()

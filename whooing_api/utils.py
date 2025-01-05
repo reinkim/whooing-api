@@ -64,11 +64,3 @@ def _fetch_rules_from_url(url):
         return lines[1:]
     else:
         return []
-
-
-def get_webhook_url():
-    token = get_settings().whooing_token
-    if not token or not token.get_secret_value():
-        raise RuntimeError('invalid webhook URL for whooing')
-
-    return f'https://whooing.com/webhook/s/{token.get_secret_value()}/'
