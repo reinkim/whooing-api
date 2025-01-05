@@ -8,7 +8,7 @@ fromWeb = '[Web발신]'
 
 # 신한은행 형식
 patternDate = re.compile(r'신한([0-9]{2})/([0-9]{2}) [0-9]{2}:[0-9]{2}')
-patternAmount = re.compile(r'출금\s+([0-9,]+)')
+patternAmount = re.compile(r'(입금|출금)\s+([0-9,]+)')
 
 
 class ShbankParser:
@@ -34,17 +34,31 @@ class ShbankParser:
         m = patternAmount.match(segments[2])
         if not m:
             raise ValueError('invalid amount format for 신한은행')
-        amount = int(m.group(1).replace(',', ''))
+        amount = int(m.group(2).replace(',', ''))
+        transferType = m.group(1).strip()
 
         item = segments[-1].strip()
         if not item:
             raise ValueError('invalid item format for 신한은행')
 
-        return {
-            'date': d,
-            'left': '기타',
-            'right': '신한은행',
-            'item': item,
-            'amount': amount,
-            'memo': '',
-        }
+        if transferType == '출금':
+            return {
+                'date': d,
+                'left': '기타',
+                'right': '신한은행',
+                'item': item,
+                'amount': amount,
+                'memo': '',
+            }
+        elif transferType == '입금':
+            return {
+                'date': d,
+                'left': '신한은행',
+                'right': '기타수익',
+                'item': f'입금(미분류,{item})',
+                'amount': amount,
+                'memo': f'TBD: 입금 {item}',
+            }
+        else:
+            raise ValueError('invalid transfer type for 신한은행 - ' + transferType)
+

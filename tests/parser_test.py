@@ -44,6 +44,24 @@ def test_shbank():
     }
     assert expected == v
 
+    # 입금
+    example1 = '''[Web발신]
+신한01/04 15:10
+123-456-789012
+입금     100,166
+잔액 12,345,678
+ 화수분'''
+    v = parser.parse(example1)
+    expected = {
+        'date': datetime.date(2025, 1, 4),
+        'amount': 100166,
+        'left': '신한은행',
+        'right': '기타수익',
+        'item': '입금(미분류,화수분)',
+        'memo': 'TBD: 입금 화수분',
+    }
+    assert expected == v
+
 
 # 신한카드
 def test_shcard_krw():
