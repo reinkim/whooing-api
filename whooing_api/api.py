@@ -55,11 +55,13 @@ async def payment(method: str, msg: SMSMessage):
     if cat != '' and name != '':
         parsed['left'] = cat
         parsed['item'] = name
-        if '미분류' in name:
+        if '미분류' in name and parsed['memo'] == '':
             parsed['memo'] = 'TBD: 재분류'
     else:
-        parsed['left'] = '기타'
-        parsed['memo'] = 'TBD: 재분류'
+        if not parsed['left']:
+            parsed['left'] = '기타'
+        if not parsed['memo']:
+            parsed['memo'] = 'TBD: 재분류'
 
     we = to_whooing_entry(parsed)
     resp = await app.client.spend(we)

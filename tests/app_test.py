@@ -85,6 +85,25 @@ def test_spend_shbank():
         memo='')
     app.client.spend.assert_called_once_with(expected)
 
+    app.client.spend = AsyncMock(return_value='done')
+    msg = '''[Web발신]
+신한01/04 15:10
+123-456-789012
+입금     100,166
+잔액 12,345,678
+ 화수분'''
+    res = client.post('/whooing/shbank/', json={'message': msg})
+    assert res.json() == {'status': 'done'}
+
+    expected = whooing_api.whooing.WhooingEntry(
+        entry_date='20250104',
+        item='입금(미분류,화수분)',
+        left='신한은행',
+        right='기타수익',
+        money=100166,
+        memo='TBD: 입금 화수분')
+    app.client.spend.assert_called_once_with(expected)
+
 
 def test_spend_kbbank():
     app = whooing_api.api.app
