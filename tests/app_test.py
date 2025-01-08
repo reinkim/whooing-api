@@ -150,3 +150,23 @@ def test_spend_shdebit():
         money=28600,
         memo='')
     app.client.spend.assert_called_once_with(expected)
+
+def test_spend_unknown_mapping():
+    app = whooing_api.api.app
+    app.lookup_table = table
+
+    client = TestClient(app)
+
+    app.client.spend = AsyncMock(return_value='done')
+    msg = '[Web발신]신한(1234)승인 최*희 10,000원(일시불)12/25 12:34 샹그릴라'
+    res = client.post('/whooing/shcard/', json={'message': msg})
+    assert res.json() == {'status': 'done'}
+
+    expected = whooing_api.whooing.WhooingEntry(
+        entry_date='20241225',
+        item='샹그릴라',
+        left='기타',
+        right='신한카드',
+        money=10000,
+        memo='TBD: 재분류')
+    app.client.spend.assert_called_once_with(expected)
