@@ -66,3 +66,12 @@ async def payment(method: str, msg: SMSMessage):
     we = to_whooing_entry(parsed)
     resp = await app.client.spend(we)
     return {'status': resp}
+
+
+@app.put('/reload/')
+async def reload():
+    app.lookup_table = CategoryTable(get_rules(get_settings().rules))
+    return {
+        'status': 'ok',
+        'len': app.lookup_table.len(),
+    }

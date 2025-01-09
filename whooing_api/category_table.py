@@ -42,3 +42,5 @@ class CategoryTable:
 
             return v.value.spend_type, v.value.name
 
+    def len(self):
+        return len(self.trie)
