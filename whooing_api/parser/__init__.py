@@ -1,11 +1,11 @@
 # vim: fileencoding=utf-8 tabstop=4 softtabstop=4 shiftwidth=4
 
-from .kbbank_parser import KbbankParser
+from .kbbank import KbbankParser
 from .hdcard import HdcardParser
-from .naverpay_parser import NaverpayParser
-from .shcard_parser import ShcardParser
-from .shbank_parser import ShbankParser
-from .shdebit_parser import ShdebitParser
+from .naverpay import NaverpayParser
+from .shcard import ShcardParser
+from .shbank import ShbankParser
+from .shdebit import ShdebitParser
 
 
 _parsers= {
