@@ -294,3 +294,23 @@ def test_naverpay_offline():
         'item': 'GS25 대통령실점',
         'memo': '',
     }
+
+
+def test_hdcard():
+    parser = whooing_api.parser.HdcardParser()
+    msg = '''[Web발신]
+현대카드 ZERO 승인
+홍*동
+300,123원 일시불
+01/14 12:08
+코스트코코리아'''
+    v = parser.parse(msg)
+
+    assert v == {
+        'date': datetime.date(2025, 1, 14),
+        'amount': 300123,
+        'left': '기타',
+        'right': '현대카드',
+        'item': '코스트코코리아',
+        'memo': '',
+    }
