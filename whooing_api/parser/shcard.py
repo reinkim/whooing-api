@@ -16,9 +16,9 @@ patternDate = re.compile(r'([0-9]{2})/([0-9]{2}) ([0-9]{2}):([0-9]{2})')
 patternItem = re.compile(r'(.*?)(\s누적[0-9,]+원)?$')
 
 # 2025년부터 보이는 새 패턴
-patternShcardAlt = re.compile(r'신한해외승인 \w+\([0-9]{4}\)')
+patternShcardAlt = re.compile(r'신한해외승인 \S+\([0-9]{4}\)')
 patternDateAlt = re.compile(r'([0-9]{2})/([0-9]{2}) ([0-9]{2}):([0-9]{2})')
-patternAmountUSDAlt = re.compile(r'\S+ ([1-9][0-9,]*\.[0-9]{1,2}) 달러\s+\([A-Z]{2}\)')
+patternAmountKRWAlt= re.compile(r'KRW ([1-9][0-9,]*)\s+\([A-Z]{2}\)')
 
 # 아파트 관리비
 patternApt = re.compile(r'신한카드\([0-9]{4}\)승인 \S+ 아파트 관리비\s*([1-9][0-9,]*)원 정상승인')
@@ -60,7 +60,7 @@ class ShcardParser:
         else:
             m = patternShcardAlt.match(msg)
             if not m:
-                return None
+                raise ValueError('unknown message format')
             return self._parse_alt(msg[len(m.group(0)):].strip())
 
         msg = msg[len(m.group(0)):].strip()
@@ -109,12 +109,17 @@ class ShcardParser:
         msg = msg[len(m.group(0)):].strip()
 
         m = patternAmountUSD.match(msg)
-        if not m:
-            raise ValueError('invalid amount format for 신한카드')
-        # no strict validation for thousand separtors
-        value = decimal.Decimal(value=m.group(1))
-        amount = int(value * rateUSD2KRW)
-        memo = f'TBD, USD {value}'
+        if m:
+            # no strict validation for thousand separtors
+            value = decimal.Decimal(value=m.group(1))
+            amount = int(value * rateUSD2KRW)
+            memo = f'TBD, USD {value}'
+        else:
+            m = patternAmountKRWAlt.match(msg)
+            if not m:
+                raise ValueError('invalid amount format for 신한카드')
+            amount = int(m.group(1).replace(',', ''))
+            memo = ''
         msg = msg[len(m.group(0)):].strip()
 
         m = patternItem.match(msg)
