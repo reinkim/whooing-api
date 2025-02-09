@@ -68,10 +68,10 @@ from whooing_api.parser.shcard import *
 KRW 53,800 (US)DNH*GODADDY#35512655''',
             {
                 'date': datetime.date(2025, 1, 28),
-                'amount': 53800,
+                'amount': int(53800 * 1.08),
                 'right': '신한카드',
                 'item': 'DNH*GODADDY#35512655',
-                'memo': '',
+                'memo': 'TBD, 원화 결제 53,800',
             },
             id='KRW, US',
         ),

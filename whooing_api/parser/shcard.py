@@ -119,7 +119,9 @@ class ShcardParser:
             if not m:
                 raise ValueError('invalid amount format for 신한카드')
             amount = int(m.group(1).replace(',', ''))
-            memo = ''
+            memo = f'TBD, 원화 결제 {amount:,}'
+            # 원화 해외 결제 비율 적용 (최대치인 8% 추가로 계산)
+            amount = self._get_foreign_krw_payment(amount)
         msg = msg[len(m.group(0)):].strip()
 
         m = patternItem.match(msg)
@@ -142,3 +144,6 @@ class ShcardParser:
         today = today_kr()
         d = nearest_date(month, day, today)
         return d
+
+    def _get_foreign_krw_payment(self, price_in_krw):
+        return int(price_in_krw * 1.08)
