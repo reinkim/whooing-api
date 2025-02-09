@@ -19,8 +19,8 @@ dependencies = [
     "sentry-sdk[fastapi]",
     'pygtrie',
     "requests>=2.32.3",
+    "httpx>=0.28.1",
 ]
-
 
 [project.optional-dependencies]
 all = [
@@ -56,4 +56,9 @@ xfail_strict = true
 junit_family = "xunit2"
 filterwarnings = [
     "error",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
 ]
