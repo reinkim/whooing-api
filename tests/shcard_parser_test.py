@@ -108,20 +108,35 @@ def test_shcard(test_input, expected):
     assert expected == actual
 
 
+@pytest.mark.parametrize(
+    'test_input,expected', [
+        pytest.param(
+            '''[Web발신]
+[신한체크승인] 김*수(4321) 04/26 00:15 (금액)44,200원 카카오T일반택시_0''',
+            {
+                'date': datetime.date(2025, 4, 26),
+                'amount': 44_200,
+                'right': '신한체크',
+                'item': '카카오T일반택시_0',
+                'memo': '',
+            },
+            id='카카오택시 (2025)',
+        ),
+        pytest.param(
+            '''[Web발신]
+[신한체크승인] 홍길*(1231) 10/20 00:23 28,600원 카카오T일반택  잔액12,345,678원''',
+            {
+                'date': datetime.date(2025, 10, 20),
+                'amount': 28_600,
+                'right': '신한체크',
+                'item': '카카오T일반택',
+                'memo': '',
+            },
+            id='카카오택시 (2024)',
+        ),
+    ])
 # 체크카드
-def test_shdebit():
+def test_shdebit(test_input, expected):
     parser = whooing_api.parser.ShdebitParser()
-
-    example0 = '''[Web발신]
-[신한체크승인] 홍길*(1231) 10/20 00:23 28,600원 카카오T일반택  잔액12,345,678원'''
-
-    v = parser.parse(example0)
-
-    expected = {
-        'date': datetime.date(2024, 10, 20),
-        'amount': 28600,
-        'right': '신한체크',
-        'item': '카카오T일반택',
-        'memo': '',
-    }
-    assert expected == v
+    actual = parser.parse(test_input)
+    assert expected == actual

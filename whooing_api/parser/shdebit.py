@@ -8,7 +8,7 @@ from .utils import nearest_date, today_kr
 fromWeb = '[Web발신]'
 pattern = re.compile(r'^\[신한체크승인\]\s+(\S+?)\([0-9]{4}\) '
                     r'([0-9]{2})/([0-9]{2}) [0-9]{2}:[0-9]{2} '
-                    r'([0-9,]+)원 '
+                    r'(\(금액\))?([0-9,]+)원 '
                     r'(.*?)(\s+잔액[0-9,]+원)?$')
 
 
@@ -27,8 +27,8 @@ class ShdebitParser:
 
         month = int(m.group(2))
         day = int(m.group(3))
-        amount = int(m.group(4).replace(',', ''))
-        item = m.group(5).strip()
+        amount = int(m.group(5).replace(',', ''))
+        item = m.group(6).strip()
 
         return {
             'date': nearest_date(month, day, today_kr()),
