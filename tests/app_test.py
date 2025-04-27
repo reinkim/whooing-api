@@ -163,7 +163,7 @@ def test_spend_shdebit():
     assert res.json() == {'status': 'done'}
 
     expected = whooing_api.whooing.WhooingEntry(
-        entry_date='20241020',
+        entry_date='20251020',
         item='택시',
         left='교통비',
         right='신한체크',
